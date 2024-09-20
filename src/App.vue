@@ -14,6 +14,7 @@ import Navbar from './components/Navbar.vue';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
+  margin-left:3rem;
   color: #2c3e50;
 }
 
