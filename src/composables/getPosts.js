@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import { collection, getDocs } from "firebase/firestore";
-import {db} from "../firebase/config"
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../firebase/config";
 
 let getPosts = () => {
   let posts = ref([]);  // To store the fetched posts
@@ -8,8 +8,14 @@ let getPosts = () => {
 
   let load = async () => {
     try {
-      // Get a reference to the 'posts' collection in Firestore
-      const querySnapshot = await getDocs(collection(db, "posts"));
+      // Create a query to fetch posts ordered by 'createdAt' in descending order
+      const postsQuery = query(
+        collection(db, "posts"),
+        orderBy("created_at", "desc")  // Ensure 'createdAt' is the field used for sorting
+      );
+
+      // Fetch the documents
+      const querySnapshot = await getDocs(postsQuery);
 
       // Parse the documents and update the 'posts' ref
       posts.value = querySnapshot.docs.map(doc => {

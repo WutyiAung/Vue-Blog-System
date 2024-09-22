@@ -47,7 +47,7 @@ export default {
           title: title.value,
           body: body.value,
           tags: tags.value,
-          createdAt: new Date()
+          created_at: new Date()
         });
 
         // Redirect the user to the home page after adding the post
