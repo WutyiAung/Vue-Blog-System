@@ -1,55 +1,65 @@
 <template>
-    <form @submit.prevent="addPost">
-        <label>Title</label>
-        <input type="text" required v-model="title">
+  <form @submit.prevent="addPost">
+    <label>Title</label>
+    <input type="text" required v-model="title">
 
-        <label>Body</label>
-        <textarea required v-model="body"></textarea>
+    <label>Body</label>
+    <textarea required v-model="body"></textarea>
 
-        <label>Tags(hit enter to add a tag)</label>
-        <input type="text" v-model="tag" @keydown.enter.prevent="handelKeydown()">
-        <button>Add post</button>
-        <div v-for="tag in tags"  :key="tag" class="pill">
-            {{  tag }}
-        </div>
-    </form>
+    <label>Tags (hit enter to add a tag)</label>
+    <input type="text" v-model="tag" @keydown.enter.prevent="handleKeydown()">
+    
+    <button>Add post</button>
+    
+    <div v-for="tag in tags" :key="tag" class="pill">
+      {{ tag }}
+    </div>
+  </form>
 </template>
 
 <script>
 import { ref } from 'vue';
-import {useRouter} from 'vue-router';
+import { useRouter } from 'vue-router';
+import { collection, addDoc } from 'firebase/firestore';  // Import Firestore methods
+import { db } from '../firebase/config';  // Import the initialized Firestore database
 
 export default {
-    setup(){
-        let router = useRouter();
-        let title = ref("");
-        let body = ref("");
-        let tag = ref("");
-        let tags = ref([]);
-        let handelKeydown = ()=>{
-            if(!tags.value.includes(tag.value)){
-                    tags.value.push(tag.value);
-            }
-            tag.value = "";
-        }
-        let  addPost = async() => {
-            await fetch("http://localhost:3000/posts",{
-                method:"POST",
-                headers:{
-                    "Content-type": "application/json"
-                },
-                body:JSON.stringify({
-                    title : title.value,
-                    body : body.value,
-                    tags : tags.value
-                })
-            });
-            // redirect user to home page
-            router.push("/");
-        }
-        return {title,body,tag,handelKeydown,tags,addPost}
-    }
-}
+  setup() {
+    let router = useRouter();
+    let title = ref("");
+    let body = ref("");
+    let tag = ref("");
+    let tags = ref([]);
+
+    // Function to handle adding tags
+    let handleKeydown = () => {
+      if (!tags.value.includes(tag.value)) {
+        tags.value.push(tag.value);
+      }
+      tag.value = "";
+    };
+
+    // Function to add the post to Firestore
+    let addPost = async () => {
+      try {
+        // Add a new document to the 'posts' collection
+        await addDoc(collection(db, "posts"), {
+          title: title.value,
+          body: body.value,
+          tags: tags.value,
+          createdAt: new Date()
+        });
+
+        // Redirect the user to the home page after adding the post
+        router.push("/");
+      } catch (err) {
+        console.error("Error adding post: ", err.message);
+      }
+    };
+
+    return { title, body, tag, handleKeydown, tags, addPost };
+  }
+};
 </script>
 
 <style>
@@ -96,7 +106,7 @@ export default {
     color: white;
     border: none;
     padding: 8px 16px;
-    font-size: 18px
+    font-size: 18px;
   }
   .pill {
     display: inline-block;
